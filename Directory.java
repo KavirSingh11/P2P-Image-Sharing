@@ -55,29 +55,34 @@ public class Directory{
                 sc.nextLine();
                 String srcIP = sc.nextLine();
                 int srcPort = Integer.parseInt(sc.nextLine());
-
+                System.out.println(srcIP +"\n"+ srcPort);
                 byte[] initBuff = message.getBytes();
-                if(!message.contains(ip)){
+               
+
+                if(message.contains(ip)){
+                	System.out.println("Returning completed init...\n");
+                	
+                	message += "200";
+                    initBuff = message.getBytes();
+                	DatagramPacket initRet = new DatagramPacket(initBuff, initBuff.length, InetAddress.getByName(srcIP), srcPort);
+                    server.send(initRet);
+                }
+                else{
                 	System.out.println("Sending Init message to successor...\n");
                     server.receive(rcv);
                     message = new String(rcv.getData(), 0, rcv.getLength());
 
-                    message += ip + "\n";
-                    message += port + "\n";
+                    message += ip + "\r\n" + port + "\r\n";
                     DatagramPacket initPkt = new DatagramPacket(initBuff, initBuff.length, InetAddress.getByName(succIp), succPort);
                     server.send(initPkt);
                 }
-
-                if(message.contains(ip)){
-                	System.out.println("Returning completed init...\n");
-                    DatagramPacket initRet = new DatagramPacket(initBuff, initBuff.length, InetAddress.getByName(srcIP), srcPort);
-                    server.send(initRet);
-                }
+                /*
                 else{
                 	System.out.println("Returning incomplete init...\n");
+                	
                 	DatagramPacket incompleteInit = new DatagramPacket(initBuff, initBuff.length, InetAddress.getByName(srcIP), srcPort);
                 	server.send(incompleteInit);
-                }
+                }*/
             }
             else if(message.contains("QUERY")){
                 System.out.println("Query received");
