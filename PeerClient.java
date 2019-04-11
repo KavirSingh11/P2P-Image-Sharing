@@ -10,6 +10,7 @@ public class PeerClient {
     static Integer[] serverPorts = new Integer[4];
     static  ArrayList<LocalRecord> records = new ArrayList<>();
 
+    static DatagramSocket server;
     public static void main(String[] args) throws Exception {
 
 
@@ -25,6 +26,7 @@ public class PeerClient {
         System.out.println("Enter DHT 1 IP address\n");
         String dhtIp = sc.nextLine();
 
+        server = new DatagramSocket(port);
 
         System.out.println("Initializing Servers...");
 
@@ -40,10 +42,9 @@ public class PeerClient {
                     try {
                         System.out.println("Enter file name\n");
                         String fileName = sc.nextLine();
-                        DatagramSocket server = new DatagramSocket(port);
 
                         int dhtID = hashCode(fileName);
-
+                        System.out.println(serverIPs + "" + serverPorts);
                         String destIP = serverIPs[dhtID - 1];
                         int destPort = serverPorts[dhtPort - 1];
 
@@ -81,7 +82,6 @@ public class PeerClient {
 
                     byte[] buffer = message.getBytes();
 
-                    DatagramSocket server = new DatagramSocket(port);
                     DatagramPacket query = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(destIP), destPort);
                     server.send(query);
 
@@ -126,9 +126,8 @@ public class PeerClient {
                 case 3:
                 	 String exit = "EXIT\n" + ip + "\n" + port + "\n";
                 	 byte[] exitBuff = exit.getBytes();
-                	 DatagramSocket exitServer = new DatagramSocket(port);
                 	 DatagramPacket exitPacket = new DatagramPacket(exitBuff, exitBuff.length, InetAddress.getByName(dhtIp), dhtPort);
-                	 exitServer.send(exitPacket);
+                	 server.send(exitPacket);
             }
         }
 
@@ -150,27 +149,33 @@ public class PeerClient {
     public static void init(String dhtIp, int dhtPort, String ip, int port) throws Exception{
 
         Scanner sc;
-        DatagramSocket server = new DatagramSocket(port);
 
-        String message = "INIT\n" + ip + "\n" + port + "\n" + dhtIp;
+        String message = "INIT\n" + ip + "\n" + port + "\n" + dhtIp + "\n";
 
         byte[] buffer = message.getBytes();
         DatagramPacket pkt = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(dhtIp), dhtPort);
         server.send(pkt);
         System.out.println("INIT sent");
-        server.receive(pkt);
-        message = new String(pkt.getData(), 0, pkt.getLength());
+        message += "000";
+        buffer = message.getBytes();
+        DatagramPacket rcvPkt = new DatagramPacket(buffer, buffer.length);
+        server.receive(rcvPkt);
+        message = new String(rcvPkt.getData(), 0, rcvPkt.getLength());
         if(message.contains("200")){
-            System.out.println("INIT completed");
+           
+            System.out.println(message);
             sc = new Scanner(message);
-            serverIPs[0] = sc.nextLine();
+            sc.nextLine();
+            sc.nextLine();
             serverPorts[0] = Integer.parseInt(sc.nextLine());
-            for(int i = 1; i < 4; i++){
+            serverIPs[0] = sc.nextLine();
+            /*
+            for(int i = 1; i < 3; i++){
 
                 serverIPs[i] = sc.nextLine();
                 serverPorts[i] = Integer.parseInt(sc.nextLine());
 
-            }
+            }*/
         }
     }
 

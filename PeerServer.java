@@ -10,8 +10,9 @@ public class PeerServer {
         int port = Integer.parseInt(sc.nextLine());
         System.out.println("Enter IP address");
         String ip = sc.nextLine();
+        ServerSocket server;
         try {
-            ServerSocket server = new ServerSocket(port);
+             server = new ServerSocket(port);
             Socket socket = server.accept();
             DataInputStream in = new DataInputStream(socket.getInputStream());
             String message = in.readUTF();
@@ -28,7 +29,8 @@ public class PeerServer {
 
         }
         catch(IOException e){
-            System.out.println("Error");
+          System.out.println("error"); 
+          
         }
 
     }
