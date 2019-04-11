@@ -1,4 +1,3 @@
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -52,12 +51,14 @@ public class Directory{
                 server.send(response);
             }
             else if(message.contains("INIT")){
+            	System.out.println("Init in progress...\n");
                 sc.nextLine();
                 String srcIP = sc.nextLine();
                 int srcPort = Integer.parseInt(sc.nextLine());
 
                 byte[] initBuff = message.getBytes();
                 if(!message.contains(ip)){
+                	System.out.println("Sending Init message to successor...\n");
                     server.receive(rcv);
                     message = new String(rcv.getData(), 0, rcv.getLength());
 
@@ -68,8 +69,14 @@ public class Directory{
                 }
 
                 if(message.contains(ip)){
+                	System.out.println("Returning completed init...\n");
                     DatagramPacket initRet = new DatagramPacket(initBuff, initBuff.length, InetAddress.getByName(srcIP), srcPort);
                     server.send(initRet);
+                }
+                else{
+                	System.out.println("Returning incomplete init...\n");
+                	DatagramPacket incompleteInit = new DatagramPacket(initBuff, initBuff.length, InetAddress.getByName(srcIP), srcPort);
+                	server.send(incompleteInit);
                 }
             }
             else if(message.contains("QUERY")){
@@ -85,7 +92,22 @@ public class Directory{
                 server.send(response);
             }
             else if(message.contains("EXIT")){
-
+            	sc.nextLine();
+            	String srcIP = sc.nextLine();
+            	int srcPort = Integer.parseInt(sc.nextLine());
+            	content.remove(srcIP);
+            	if(message.contains(Integer.toString(ID))){
+                	byte[] buff = message.getBytes();
+            		DatagramPacket sendToSrc = new DatagramPacket(buff, buff.length, InetAddress.getByName(srcIP), srcPort);
+            		server.send(sendToSrc);
+            	}
+            	else{
+            		message += ID + "\n";
+            		byte[] buff = message.getBytes();
+            		DatagramPacket sendToSucc = new DatagramPacket(buff, buff.length, InetAddress.getByName(succIp), succPort);
+            		server.send(sendToSucc);
+            	}
+            	
             }
 
         }

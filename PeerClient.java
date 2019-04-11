@@ -30,9 +30,9 @@ public class PeerClient {
 
         init(dhtIp, dhtPort, ip, port);
 
+        System.out.println("Enter 1 to upload a file.\nEnter 2 to get a file.\nEnter 3 to exit and remove all references of this peer\n");
 
         while (true) {
-            System.out.println("Enter 1 to upload a file.\nEnter 2 to get a file.\nEnter 3 to exit and remove all references of this peer\n");
             int input = sc.nextInt();
 
             switch (input){
@@ -122,6 +122,13 @@ public class PeerClient {
                     }
                     System.out.println();
                     break;
+                    
+                case 3:
+                	 String exit = "EXIT\n" + ip + "\n" + port + "\n";
+                	 byte[] exitBuff = exit.getBytes();
+                	 DatagramSocket exitServer = new DatagramSocket(port);
+                	 DatagramPacket exitPacket = new DatagramPacket(exitBuff, exitBuff.length, InetAddress.getByName(dhtIp), dhtPort);
+                	 exitServer.send(exitPacket);
             }
         }
 
